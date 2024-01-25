@@ -197,32 +197,125 @@
 
 const canvas = document.getElementById("canvas");
 const ctx = canvas.getContext("2d");
-const SNAKE_SPEED = 500;
+const SNAKE_SPEED = 300;
 let snakeX = 0;
 let snakeY = 0;
 let snakeSize = 10;
+let snakeDir = "right";
+let foodX = 100;
+let foodY = 100;
+let snakeHistory = [];
 
+//loading the snake with x,y values
 const loadSnake = (x, y) => {
+  ctx.fillStyle = "black";
   ctx.fillRect(x, y, snakeSize, snakeSize);
   ctx.fill();
 };
 
-console.log(ctx);
+const loadFood = (x, y) => {
+  ctx.fillStyle = "blue";
+  ctx.fillRect(x, y, snakeSize, snakeSize);
+  ctx.fill();
+};
 
+//check for food
+const checkForFoodCord = () => {
+  if (snakeX === foodX && snakeY === foodY) {
+    // snakeHistory.push({ x: snakeX - snakeSize, y: snakeY - snakeSize });
+    if (snakeDir === "down")
+      snakeHistory.push({ x: snakeX, y: snakeY - snakeSize });
+  }
+};
+
+const createSnakeTail = () => {
+  snakeHistory.map((snakeCord) => {
+    loadSnake(snakeCord.x, snakeCord.y);
+  });
+};
+
+const updateSnake = () => {
+  // switch (snakeDirection) {
+  //   case "up":
+  //     snakeY -= snakeSize;
+  //     break;
+  //   case "down":
+  //     snakeY += snakeSize;
+  //     break;
+  //   case "left":
+  //     snakeX -= snakeSize;
+  //     break;
+  //   case "right":
+  //     snakeX += snakeSize;
+  //     break;
+  // }
+
+  if (snakeDir === "left") {
+    snakeX -= snakeSize;
+  } else if (snakeDir === "right") {
+    snakeX += snakeSize;
+  } else if (snakeDir === "up") {
+    snakeY -= snakeSize;
+  } else if (snakeDir === "down") {
+    snakeY += snakeSize;
+  }
+};
+
+const checkCordination = () => {
+  if (snakeX > canvas.width) {
+    snakeX = 0;
+  } else if (snakeX < 0) {
+    snakeX = canvas.width;
+  } else if (snakeY > canvas.height) {
+    snakeY = 0;
+  } else if (snakeY < 0) {
+    snakeY = canvas.height;
+  }
+};
+
+// function updateTail() {
+//   if (snakeHistory.length <= 1) {
+//     return;
+//     // return;
+//   }
+//   snakeHistory.map((elem, i) => {
+//     console.log(
+//       [elem.x, elem.y],
+//       [snakeHistory[i + 1].x, snakeHistory[i + 1].y]
+//     );
+//     elem.x = snakeHistory[i + 1].x;
+//     elem.y = snakeHistory[i + 1].y;
+//   });
+// }
+
+//Running the game engine interval
 setInterval(() => {
   ctx.clearRect(0, 0, 600, 400); //clearing the canvas
+  loadFood(foodX, foodY);
   loadSnake(snakeX, snakeY); //loading snake
-  snakeX += snakeSize;
-  console.log(snakeX);
+  updateSnake(); // check for updated dir -- apply respective cordination calculation;
+  checkCordination(); //check for cordination
+  checkForFoodCord();
+  createSnakeTail();
+  // updateTail();
+  console.log("history", snakeHistory);
 }, SNAKE_SPEED);
 
+// Snake is x = 50, y=0 if we press down x=50, increse y value at snakeSize
+// (50,0) - (50,10) - (50,20) ...
 document.addEventListener("keydown", (e) => {
   switch (e.code) {
     case "ArrowUp":
-      snakeY -= snakeSize;
+      snakeDir = "up";
       break;
     case "ArrowDown":
-      snakeY += snakeSize;
+      snakeDir = "down";
+      break;
+    case "ArrowLeft":
+      snakeDir = "left";
+      break;
+    case "ArrowRight":
+      snakeDir = "right";
       break;
   }
 });
